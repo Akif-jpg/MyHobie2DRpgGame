@@ -1,19 +1,25 @@
 package engine
 
 import (
+	"context"
 	"time"
 
 	"github.com/Akif-jpg/MyHobieMMORPGGame/services/engine/entities"
 )
 
 type Engine struct {
-	// Add fields for game state, such as players, NPCs, items, etc.
 	entitiyList []entities.Entity
+	ctx         context.Context
+	cancel      context.CancelCauseFunc
 }
 
-func NewEngine() *Engine {
+func NewEngine(parent context.Context) *Engine {
+	ctx, cancel := context.WithCancelCause(parent)
+
 	return &Engine{
-		make([]entities.Entity, 0),
+		entitiyList: make([]entities.Entity, 0),
+		ctx:         ctx,
+		cancel:      cancel,
 	}
 }
 
@@ -25,38 +31,34 @@ func (e *Engine) Start() {
 	go e.update()
 }
 
-// Update the game state based on player actions and other events
 func (e *Engine) update() {
-	// Implement game logic here
 	lastUpdateTime := time.Now()
 
 	for {
+		select {
+		case <-e.ctx.Done():
+			// Engine düzgün şekilde durdurulur
+			return
+		default:
+		}
+
 		now := time.Now()
 		deltaTime := now.Sub(lastUpdateTime).Seconds()
 		lastUpdateTime = now
 
-		// Process player actions and other events here
-
-		// Example: Update NPCs, handle combat, etc.
-		//
-		// Make entitiy list pre updates
 		for _, entity := range e.entitiyList {
-			entity.PreUpdate(deltaTime)
+			entity.PreUpdate(e.ctx, deltaTime)
 		}
 
-		// Make entitiy list updates
 		for _, entity := range e.entitiyList {
-			entity.Update(deltaTime)
+			entity.Update(e.ctx, deltaTime)
 		}
 
-		// Make entitiy list last updates
 		for _, entity := range e.entitiyList {
-			entity.LastUpdate(deltaTime)
+			entity.LastUpdate(e.ctx, deltaTime)
 			if !entity.IsAlive() {
-				// Handle entity death, such as removing it from the game world, dropping loot, etc.
+				// cleanup / removal
 			}
 		}
 	}
-
-	// Update game state here
 }
