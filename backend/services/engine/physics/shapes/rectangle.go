@@ -19,11 +19,15 @@ func NewRectangle(center Point, width, height float64) *Rectangle {
 }
 
 func (r *Rectangle) GetType() string {
-	return "Rectangle"
+	return RectangleType
 }
 
 func (r *Rectangle) GetCenter() Point {
 	return r.Center
+}
+
+func (r *Rectangle) SetCenter(center Point) {
+	r.Center = center
 }
 
 func (r *Rectangle) GetWidth() float64 {

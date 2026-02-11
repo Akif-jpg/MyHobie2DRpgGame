@@ -1,8 +1,14 @@
 package shapes
 
+const (
+	CircleType    = "circle"
+	RectangleType = "rectangle"
+)
+
 type Shape interface {
 	GetType() string
 	GetCenter() Point
+	SetCenter(center Point)
 
 	IntersectsRectangle(other *Rectangle) bool
 	IntersectsCircle(other *Circle) bool

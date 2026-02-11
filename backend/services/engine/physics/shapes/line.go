@@ -84,6 +84,13 @@ func (l *Line) GetCenter() Point {
 	}
 }
 
+func (l *Line) SetCenter(center Point) {
+	l.Start.X = center.X - (l.End.X-l.Start.X)/2
+	l.Start.Y = center.Y - (l.End.Y-l.Start.Y)/2
+	l.End.X = center.X + (l.End.X-l.Start.X)/2
+	l.End.Y = center.Y + (l.End.Y-l.Start.Y)/2
+}
+
 // IntersectsRectangle checks if the line intersects with a rectangle.
 // This delegates to Rectangle.IntersectsLine for the actual implementation.
 func (l *Line) IntersectsRectangle(other *Rectangle) bool {

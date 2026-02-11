@@ -2,6 +2,7 @@ package collision
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/Akif-jpg/MyHobieMMORPGGame/services/engine/physics/collider"
 	"github.com/Akif-jpg/MyHobieMMORPGGame/services/engine/physics/shapes"
@@ -32,6 +33,7 @@ type CollisionData struct {
 type CollisionBody struct {
 	EntityID  string
 	Transform shapes.Point // World position
+	Rotation  float64      // World rotation
 	Collider  *collider.Collider
 }
 
@@ -60,29 +62,19 @@ func (cb *CollisionBody) GetWorldShape() (shapes.Shape, error) {
 
 // translateShape helper - shape'i world space'e taşır
 func (cb *CollisionBody) translateShape(shape shapes.Shape, offset shapes.Point) (shapes.Shape, error) {
-	switch s := shape.(type) {
-	case *shapes.Circle:
-		worldCircle := *s
-		center := s.GetCenter()
-		worldCircle.Center = shapes.Point{
-			X: center.X + offset.X,
-			Y: center.Y + offset.Y,
-		}
-		return &worldCircle, nil
-
-	case *shapes.Rectangle:
-		worldRect := *s
-		center := s.GetCenter()
-		worldRect.Center = shapes.Point{
-			X: center.X + offset.X,
-			Y: center.Y + offset.Y,
-		}
-		return &worldRect, nil
-
-	// Line ve diğerleri eklenebilir...
-	default:
-		return nil, fmt.Errorf("%w: %T", ErrUnknownShape, shape)
+	center := shape.GetCenter()
+	worldCenter := shapes.Point{
+		X: center.X + offset.X,
+		Y: center.Y + offset.Y,
 	}
+	return shape.SetCenter(worldCenter), nil
+}
+
+func (cb *CollisionBody) rotateShape(shape shapes.Shape, angle float64) (shapes.Shape, error) {
+	point := shape.GetCenter()
+	x := point.X*math.Cos(angle) - point.Y*math.Sin(angle)
+	y := point.X*math.Sin(angle) + point.Y*math.Cos(angle)
+	return shape.SetCenter(shapes.Point{X: x, Y: y}), nil
 }
 
 // CheckCollision iki body arasındaki çarpışmayı test eder (Narrow Phase)
@@ -112,23 +104,7 @@ func CheckCollision(bodyA, bodyB *CollisionBody) (*CollisionData, error) {
 
 	isColliding := false
 
-	switch sA := shapeA.(type) {
-	case *shapes.Circle:
-		switch sB := shapeB.(type) {
-		case *shapes.Circle:
-			isColliding = sA.IntersectsCircle(sB)
-		case *shapes.Rectangle:
-			isColliding = sA.IntersectsRectangle(sB)
-		}
-	case *shapes.Rectangle:
-		switch sB := shapeB.(type) {
-		case *shapes.Circle:
-			// Rectangle vs Circle (Circle'ın metodunu tersten çağır)
-			isColliding = sB.IntersectsRectangle(sA)
-		case *shapes.Rectangle:
-			// isColliding = sA.IntersectsRectangle(sB) // (Shape paketinde olmalı)
-		}
-	}
+	// Add shape to intersection or collision with any shape
 
 	if isColliding {
 		return &CollisionData{
@@ -143,4 +119,26 @@ func CheckCollision(bodyA, bodyB *CollisionBody) (*CollisionData, error) {
 	}
 
 	return nil, nil
+}
+
+func (cb *CollisionBody) collisionShape(shapeA, shapeB shapes.Shape) (bool, error) {
+	isColliding := false
+
+	switch sA := shapeA.GetType(); sA {
+	case shapes.CircleType:
+		switch sB := shapeB.GetType(); sB {
+		case shapes.CircleType:
+			isColliding = shapeA.IntersectsCircle(shapeB.(*shapes.Circle))
+		case shapes.RectangleType:
+			isColliding = shapeA.IntersectsRectangle(shapeB.(*shapes.Rectangle))
+		}
+	case shapes.RectangleType:
+		switch sB := shapeB.GetType(); sB {
+		case shapes.CircleType:
+			isColliding = shapeB.(*shapes.Circle).IntersectsRectangle(shapeA.(*shapes.Rectangle))
+		case shapes.RectangleType:
+			isColliding = shapeA.(*shapes.Rectangle).IntersectsRectangle(shapeB.(*shapes.Rectangle))
+		}
+	}
+	return isColliding, nil
 }

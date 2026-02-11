@@ -10,11 +10,15 @@ type Circle struct {
 }
 
 func (c *Circle) GetType() string {
-	return "Circle"
+	return CircleType
 }
 
 func (c *Circle) GetCenter() Point {
 	return c.Center
+}
+
+func (c *Circle) SetCenter(center Point) {
+	c.Center = center
 }
 
 func (c *Circle) GetRadius() float64 {
