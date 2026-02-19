@@ -1,17 +1,12 @@
 package entities
 
-type Entity struct {
-	ID        int
-	Name      string
-	Width     int
-	Height    int
-	Collision []int
-}
+import "github.com/Akif-jpg/MyHobieMMORPGGame/services/engine/components"
 
-type IEntity interface {
-	GetID() int
-	GetName() string
-	GetWidth() int
-	GetHeight() int
-	GetCollision() []int
+type Entity struct {
+	Identifier string                 `json:"__identifier"` // Name of the Entity
+	IID        string                 `json:"iid"`          // IID of the Entity
+	Position   []int                  `json:"px"`           // Position of the Entity (x, y)
+	Tags       []string               `json:"__tags"`       // Tags (categories) assigned to the Entity
+	Components []components.Component `json:"components"`   // Components of the Entity
+	Data       any                    `json:"-"`            // Data allows you to attach key custom data to the entity post-parsing
 }

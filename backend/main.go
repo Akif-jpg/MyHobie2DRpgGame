@@ -7,4 +7,5 @@ import (
 func main() {
 	app := gameapp.New()
 	app.Init(gameapp.DEVELOPER)
+	app.Start()
 }

@@ -1,23 +1,10 @@
-// Package gameapp provides application initialization and runtime
-// environment utilities for the MyHobieMMORPGGame server.
-/*
- Copyright 2024 Akif-jpg
-
- Licensed under the Apache License, Version 2.0 (the "License");
- you may not use this file except in compliance with the License.
- You may obtain a copy of the License at
-
-     http://www.apache.org/licenses/LICENSE-2.0
-
- Unless required by applicable law or agreed to in writing, software
- distributed under the License is distributed on an "AS IS" BASIS,
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and
- limitations under the License.
-*/
+// Package gameapp
 package gameapp
 
 import (
+	"fmt"
+	"sync"
+
 	gameconfig "github.com/Akif-jpg/MyHobieMMORPGGame/config"
 	"github.com/gofiber/fiber/v3"
 )
@@ -32,28 +19,39 @@ const (
 type GameApp struct {
 	App        *fiber.App
 	GameConfig *gameconfig.GameConfig
+	initOnce   sync.Once // Init'in bir kez çalışmasını garantiler
 }
 
 func New() *GameApp {
-	ga := &GameApp{}
-	ga.Init(DEVELOPER)
-	return ga
+	return &GameApp{}
 }
 
 func (g *GameApp) Init(ree RuntimeEnvEnum) {
-	if g.GameConfig == nil {
+	g.initOnce.Do(func() {
 		switch ree {
 		case DEVELOPER:
 			g.GameConfig = (&gameconfig.GameConfig{}).GetConfig(gameconfig.DEVELOPER)
+			fmt.Println("Developer game config initialized")
 		case PRODUCT:
 			g.GameConfig = (&gameconfig.GameConfig{}).GetConfig(gameconfig.PRODUCT)
+			fmt.Println("Product game config initialized")
 		default:
 			g.GameConfig = (&gameconfig.GameConfig{}).GetConfig(gameconfig.DEVELOPER)
+			fmt.Println("Default game config initialized")
 		}
-	}
-	g.App = fiber.New()
-	g.App.Get("health", func(c fiber.Ctx) error {
-		return c.SendString("OK")
+
+		g.App = fiber.New()
+		g.App.Get("health", func(c fiber.Ctx) error {
+			return c.SendString("OK")
+		})
+
+		fmt.Println("Port:", g.GameConfig.Port)
 	})
-	g.App.Listen(":" + g.GameConfig.Port)
+}
+
+func (g *GameApp) Start() error {
+	if g.App == nil || g.GameConfig == nil {
+		return fmt.Errorf("GameApp is not initialized, call Init() first")
+	}
+	return g.App.Listen(":" + g.GameConfig.Port)
 }

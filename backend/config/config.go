@@ -35,6 +35,7 @@ func (gc *GameConfig) InitGameConfigWithDefaults() {
 	gc.Host = "localhost"
 	gc.Port = "8080"
 	gc.SecretKey = "mysecretkey"
+	fmt.Println(gc)
 }
 
 func (gc *GameConfig) GetConfig(gcte GameConfigTypeEnum) *GameConfig {
@@ -51,11 +52,13 @@ func (gc *GameConfig) GetConfig(gcte GameConfigTypeEnum) *GameConfig {
 	// Init game config with default values
 	if fileErr != nil {
 		gc.InitGameConfigWithDefaults()
+		return gc
 	}
 	ymlErr := yaml.Unmarshal(file, gc)
 	// Init game config with default values
 	if ymlErr != nil {
 		gc.InitGameConfigWithDefaults()
+		return gc
 	}
 
 	return gc

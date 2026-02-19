@@ -11,3 +11,10 @@ type Event[T any] struct {
 // }
 
 type EventHandler[T any] func(event Event[T])
+
+func NewEvent[T any](data T, eventType string) *Event[T] {
+	return &Event[T]{
+		EventType: eventType,
+		Data:      data,
+	}
+}
