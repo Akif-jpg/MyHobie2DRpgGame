@@ -3,6 +3,7 @@ package gameapp
 
 import (
 	"fmt"
+	"strconv"
 	"sync"
 
 	gameconfig "github.com/Akif-jpg/MyHobieMMORPGGame/config"
@@ -53,5 +54,5 @@ func (g *GameApp) Start() error {
 	if g.App == nil || g.GameConfig == nil {
 		return fmt.Errorf("GameApp is not initialized, call Init() first")
 	}
-	return g.App.Listen(":" + g.GameConfig.Port)
+	return g.App.Listen(":" + strconv.Itoa(g.GameConfig.Port))
 }

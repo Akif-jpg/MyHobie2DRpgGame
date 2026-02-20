@@ -1,0 +1,20 @@
+GAME_TITLE: "My Hobie 2D RPG Game"
+GAME_HOST: "localhost"
+GAME_PORT: 8080
+
+DATABASE_HOST: "localhost"
+DATABASE_PORT: 5432
+DATABASE_NAME: "my_hobie_2d_rpg_game"
+DATABASE_USER: "postgres"
+DATABASE_PASSWORD: "postgres"
+
+JWT_SECRET: "my_hobie_2d_rpg_game_jwt_secret"
+JWT_EXPIRATION: 1h
+
+EMAIL_HOST: "smtp.gmail.com"
+EMAIL_PORT: 587
+EMAIL_USERNAME: "my_hobie_2d_rpg_game@gmail.com"
+EMAIL_PASSWORD: "my_hobie_2d_rpg_game_password"
+
+LOG_LEVEL: "debug"
+LOG_FORMAT: "json"
